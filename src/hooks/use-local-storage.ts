@@ -20,18 +20,24 @@ export function useLocalStorage<T>(
   initialValue: T
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [storedValue, setStoredValue] = useState<T>(initialValue);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem(key, JSON.stringify(storedValue));
-    } catch (error) {
-      console.warn(`Error setting localStorage key “${key}”:`, error);
-    }
-  }, [key, storedValue]);
-  
+    const valueFromStorage = getValue(key, initialValue);
+    setStoredValue(valueFromStorage);
+    setIsInitialized(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+
   useEffect(() => {
-    setStoredValue(getValue(key, initialValue));
-  }, [key, initialValue]);
+    if (isInitialized) {
+      try {
+        window.localStorage.setItem(key, JSON.stringify(storedValue));
+      } catch (error) {
+        console.warn(`Error setting localStorage key “${key}”:`, error);
+      }
+    }
+  }, [key, storedValue, isInitialized]);
 
 
   return [storedValue, setStoredValue];
