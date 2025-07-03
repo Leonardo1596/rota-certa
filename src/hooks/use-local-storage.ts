@@ -19,7 +19,7 @@ export function useLocalStorage<T>(
   key: string,
   initialValue: T
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const [storedValue, setStoredValue] = useState<T>(() => getValue(key, initialValue));
+  const [storedValue, setStoredValue] = useState<T>(initialValue);
 
   useEffect(() => {
     try {
