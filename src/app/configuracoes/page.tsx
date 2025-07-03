@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from 'react-hook-form';
+import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useLocalStorage } from '@/hooks/use-local-storage';
@@ -11,6 +11,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { useEffect } from "react";
+import { getUserInfo } from "@/services/user";
 
 const maintenanceCostSchema = z.object({
   price: z.coerce.number().min(0, 'O preço deve ser positivo.'),
@@ -35,6 +37,7 @@ const defaultSettings: Settings = {
   kmPerLiter: 0,
 };
 
+// Define the shape of the user info including the costPerKm array
 export default function ConfiguracoesPage() {
   const [settings, setSettings] = useLocalStorage<Settings>('settings', defaultSettings);
   const { toast } = useToast();
@@ -43,6 +46,43 @@ export default function ConfiguracoesPage() {
     resolver: zodResolver(settingsSchema),
     values: settings,
   });
+
+  useEffect(() => {
+    const fetchAndSetUserInfo = async () => {
+      try {
+        const userString = localStorage.getItem("user");
+        if (!userString) {
+          console.error("User not found in local storage.");
+          return;
+        }
+
+        const user = JSON.parse(userString);
+        const userId = user._id;
+
+        if (!userId) {
+          console.error("User ID not found in local storage data.");
+          return;
+        }
+
+        const userInfo = await getUserInfo(userId);
+
+        if (userInfo && userInfo.costPerKm && userInfo.costPerKm[0]) {
+          const maintenanceData = userInfo.costPerKm[0];
+          form.reset({
+            oleo: { price: maintenanceData.oleo?.value || 0, lifespanKm: maintenanceData.oleo?.km || 0 },
+            relacao: { price: maintenanceData.relacao?.value || 0, lifespanKm: maintenanceData.relacao?.km || 0 },
+            pneuDianteiro: { price: maintenanceData.pneuDianteiro?.value || 0, lifespanKm: maintenanceData.pneuDianteiro?.km || 0 },
+            pneuTraseiro: { price: maintenanceData.pneuTraseiro?.value || 0, lifespanKm: maintenanceData.pneuTraseiro?.km || 0 },
+            gasolinaPricePerLiter: maintenanceData.gasolina?.value || 0,
+            kmPerLiter: maintenanceData.gasolina?.km || 0,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching or setting user info:", error);
+      }
+    };
+    fetchAndSetUserInfo();
+  }, [form]);
 
   function onSubmit(values: z.infer<typeof settingsSchema>) {
     setSettings(values);

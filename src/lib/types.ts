@@ -19,5 +19,5 @@ export type Entry = {
   kmFinal: number;
   gastoAlimentacao: number;
   outrosGastos: number;
-  ganho: number;
+  ganho: number; // Earnings
 };
