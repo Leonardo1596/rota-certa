@@ -9,7 +9,6 @@ import { useLocalStorage } from '@/hooks/use-local-storage';
 import { type Entry, type Settings } from '@/lib/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { calculateDashboardMetrics } from '@/lib/calculations';
-import { SuggestionTool } from '@/components/suggestion-tool';
 
 export default function DashboardPage() {
   const [entries] = useLocalStorage<Entry[]>('entries', []);
@@ -45,6 +44,17 @@ export default function DashboardPage() {
       color: "hsl(var(--chart-2))",
     },
   };
+
+  const maintenanceCostsPerKm = useMemo(() => {
+    const { oleo, relacao, pneuDianteiro, pneuTraseiro, gasolinaPricePerLiter, kmPerLiter } = settings;
+    return {
+      oleo: oleo.lifespanKm > 0 ? oleo.price / oleo.lifespanKm : 0,
+      relacao: relacao.lifespanKm > 0 ? relacao.price / relacao.lifespanKm : 0,
+      pneuDianteiro: pneuDianteiro.lifespanKm > 0 ? pneuDianteiro.price / pneuDianteiro.lifespanKm : 0,
+      pneuTraseiro: pneuTraseiro.lifespanKm > 0 ? pneuTraseiro.price / pneuTraseiro.lifespanKm : 0,
+      gasolina: kmPerLiter > 0 ? gasolinaPricePerLiter / kmPerLiter : 0,
+    };
+  }, [settings]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -118,7 +128,48 @@ export default function DashboardPage() {
             </ChartContainer>
           </CardContent>
         </Card>
-        <SuggestionTool />
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Resumo de Despesas de Manutenção</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col justify-center">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium">Óleo:</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatCurrency((settings.oleo.price / settings.oleo.lifespanKm) * metrics.totalDistance)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Relação:</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatCurrency((settings.relacao.price / settings.relacao.lifespanKm) * metrics.totalDistance)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Pneu Dianteiro:</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatCurrency((settings.pneuDianteiro.price / settings.pneuDianteiro.lifespanKm) * metrics.totalDistance)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Pneu Traseiro:</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatCurrency((settings.pneuTraseiro.price / settings.pneuTraseiro.lifespanKm) * metrics.totalDistance)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Gasolina:</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatCurrency((settings.gasolinaPricePerLiter / settings.kmPerLiter) * metrics.totalDistance)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+
       </div>
     </div>
   );

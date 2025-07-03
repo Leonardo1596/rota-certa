@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
-import { SidebarProvider, Sidebar, SidebarInset, SidebarHeader, SidebarContent } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarInset, SidebarHeader, SidebarContent, SidebarTrigger } from '@/components/ui/sidebar';
 import { Logo } from '@/components/icons';
 import { SidebarNav } from '@/components/sidebar-nav';
 
@@ -36,6 +36,13 @@ export default function RootLayout({
               </SidebarContent>
             </Sidebar>
             <SidebarInset>
+               <header className="md:hidden flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
+                <SidebarTrigger />
+                <div className="flex items-center gap-2">
+                  <Logo className="w-6 h-6 text-primary" />
+                  <span className="font-semibold">Rota Certa</span>
+                </div>
+              </header>
               <main className="flex-1 p-4 md:p-6 lg:p-8">
                 {children}
               </main>
