@@ -13,11 +13,13 @@ export type Settings = {
 };
 
 export type Entry = {
-  id: string;
+  _id: string;
   date: string; // ISO string
-  kmInicial: number;
-  kmFinal: number;
-  gastoAlimentacao: number;
-  outrosGastos: number;
-  ganho: number; // Earnings
+  initialKm: number;
+  finalKm: number;
+  kmTraveled: number;
+  foodExpense: number;
+  grossGain: number; // Earnings
+  liquidGain: number;
+  spent: number;
 };
